@@ -92,13 +92,17 @@ class CrossValidation:
                 X_test.append(values)
             y_test = y_folds[k]
 
+            print(f"Using the fold {k} for test")
+
             # The j determines the folds to be used to train. The fold used to test is not used
             for j in range(self.k_folds):
                 if j != k:
+                    print(f"Using the fold {j} for train")
                     for values in X_folds[j]:
                         X_train.append(values)
                     for y in y_folds:
                         y_train.append(y)
+            print("*******************************")
             # TODO: Insert here the classifier.fit and calculates the precision, accuracy, recall and stores somewhere
 
 
@@ -108,5 +112,5 @@ if __name__ == "__main__":
     X = spotify_df.loc[:, features].values
     y = spotify_df.loc[:, ["target"]].values
 
-    cv = CrossValidation(k_folds=2, X=X, y=y)
+    cv = CrossValidation(k_folds=5, X=X, y=y)
     cv.fit()
