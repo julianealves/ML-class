@@ -182,7 +182,7 @@ if __name__ == "__main__":
     features = ["danceability", "energy", "key", "loudness", "mode", "speechiness", "acousticness",
                          "instrumentalness", "liveness", "valence", "tempo", "duration_ms", "time_signature",
                          "chorus_hit", "sections"]
-    possible_features = ["danceability", "energy", "instrumentalness", "duration_ms", "sections", "loudness"]
+
     X = spotify_df.loc[:, features].values
     y = spotify_df.loc[:, ["target"]].values
 

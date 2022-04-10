@@ -69,22 +69,4 @@ class ConfusionMatrix:
 
     # Calculate and return the F1-measure
     def get_f1_measure(self) -> float:
-        return self._tp / (self._tp + 0.5 * (self._fp + self._fn)) 
-
-
-# Only for test
-if __name__ == "__main__":
-
-    # Using an example array to test
-    true = np.array([0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0])
-    pred = np.array([0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-
-    # Instantiate the ConfusionMatrix class with the true and predicted arrays
-    cm = ConfusionMatrix(true, pred)
-
-    cm.plot_confusion_matrix()
-
-    print("Acuracia: %f" % (cm.get_accuracy()))
-    print("Precisao: %f" % (cm.get_precision()))
-    print("Recall: %f" % (cm.get_recall()))
-    print("F1-measure: %f" % (cm.get_f1_measure()))
+        return self._tp / (self._tp + 0.5 * (self._fp + self._fn))
