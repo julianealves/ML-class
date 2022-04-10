@@ -179,7 +179,10 @@ class CrossValidation:
 
 if __name__ == "__main__":
     spotify_df = pd.read_csv("dataset-of-10s.csv")
-    features = ["danceability", "energy", "instrumentalness", "duration_ms", "sections", "loudness"]
+    features = ["danceability", "energy", "key", "loudness", "mode", "speechiness", "acousticness",
+                         "instrumentalness", "liveness", "valence", "tempo", "duration_ms", "time_signature",
+                         "chorus_hit", "sections"]
+    possible_features = ["danceability", "energy", "instrumentalness", "duration_ms", "sections", "loudness"]
     X = spotify_df.loc[:, features].values
     y = spotify_df.loc[:, ["target"]].values
 
@@ -187,30 +190,30 @@ if __name__ == "__main__":
     print("****** Running a Random Forest ******")
     print("*************************************")
     dtree = DecisionTreeClassifier(max_depth=10,
-                                   max_features="log2",
+                                   max_features="sqrt",
                                    min_samples_leaf=10,
-                                   min_samples_split=5,
+                                   min_samples_split=25,
                                    splitter="best",
-                                   criterion="entropy")
+                                   criterion="gini")
 
-    cv = CrossValidation(classifier=dtree, k_folds=5, X=X, y=y)
+    cv = CrossValidation(classifier=dtree, k_folds=15, X=X, y=y)
     cv.fit()
 
     # It is necessary to normalize the values for K-NN and Logistic Regression
     scaler = MinMaxScaler()
     scaler.fit(X)
     X = scaler.transform(X)
-
+    #
     print("***************************")
     print("****** Running a KNN ******")
     print("***************************")
-    knn = KNeighborsClassifier(n_neighbors=5)
-    cv = CrossValidation(classifier=knn, k_folds=5, X=X, y=y)
+    knn = KNeighborsClassifier(n_neighbors=13)
+    cv = CrossValidation(classifier=knn, k_folds=15, X=X, y=y)
     cv.fit()
 
     print("*******************************************")
     print("****** Running a Logistic Regression ******")
     print("*******************************************")
-    lr = LogisticRegression(tol=0.001)
-    cv = CrossValidation(classifier=lr, k_folds=5, X=X, y=y)
+    lr = LogisticRegression(tol=0.001, solver="newton-cg")
+    cv = CrossValidation(classifier=lr, k_folds=15, X=X, y=y)
     cv.fit()
