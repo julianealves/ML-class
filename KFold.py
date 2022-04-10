@@ -12,6 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import MinMaxScaler
+from ConfusionMatrix import ConfusionMatrix
 
 
 class CrossValidation:
@@ -27,6 +28,11 @@ class CrossValidation:
         self.k_folds = k_folds
         self.X = X
         self.y = y
+        self.accuracy = []
+        self.precision = []
+        self.recall = []
+        self.specificity = []
+        self.f1_measure = []
 
     def fit(self) -> None:
         num_samples = len(self.y)
@@ -120,11 +126,45 @@ class CrossValidation:
 
             self.classifier.fit(X_train, y_train)
             y_pred = self.classifier.predict(X_test)
-            print(f"Prediction: {y_pred}")
+
+            self.print_report(y_pred, y_test)
 
             print("*******************************")
 
-            # TODO: calculate the precision, accuracy, recall and stores somewhere
+        self.print_final_report()
+
+    def print_report(self, y_pred: np.ndarray, y_test: np.ndarray) -> None:
+        cm = ConfusionMatrix(y_test, y_pred)
+        accuracy = cm.get_accuracy()
+        precision = cm.get_precision()
+        recall = cm.get_recall()
+        specificity = cm.get_specificity()
+        f1_measure = cm.get_f1_measure()
+        print(f"Accuracy: {accuracy}")
+        print(f"Precision: {precision}")
+        print(f"Recall: {recall}")
+        print(f"Specificity: {specificity}")
+        print(f"F1_measure: {f1_measure}")
+        self.accuracy.append(accuracy)
+        self.precision.append(precision)
+        self.recall.append(recall)
+        self.specificity.append(specificity)
+        self.f1_measure.append(f1_measure)
+        cm.plot_confusion_matrix()
+
+    def print_final_report(self) -> None:
+        accuracy = self._get_avg(self.accuracy)
+        precision = self._get_avg(self.precision)
+        recall = self._get_avg(self.recall)
+        specificity = self._get_avg(self.specificity)
+        f1_measure = self._get_avg(self.f1_measure)
+
+        print("****** FINAL REPORT ******")
+        print(f"Accuracy: {accuracy}")
+        print(f"Precision: {precision}")
+        print(f"Recall: {recall}")
+        print(f"Specificity: {specificity}")
+        print(f"F1_measure: {f1_measure}")
 
     def _get_train_fold_shape(self, k: int, X_folds: List) -> int:
         rows = 0
@@ -133,6 +173,9 @@ class CrossValidation:
                 rows = rows + len(X_folds[fold])
         return rows
 
+    def _get_avg(self, array: List) -> float:
+        return sum(array) / len(array)
+
 
 if __name__ == "__main__":
     spotify_df = pd.read_csv("dataset-of-10s.csv")
@@ -140,7 +183,9 @@ if __name__ == "__main__":
     X = spotify_df.loc[:, features].values
     y = spotify_df.loc[:, ["target"]].values
 
+    print("*************************************")
     print("****** Running a Random Forest ******")
+    print("*************************************")
     dtree = DecisionTreeClassifier(max_depth=10,
                                    max_features="log2",
                                    min_samples_leaf=10,
@@ -156,12 +201,16 @@ if __name__ == "__main__":
     scaler.fit(X)
     X = scaler.transform(X)
 
+    print("***************************")
     print("****** Running a KNN ******")
+    print("***************************")
     knn = KNeighborsClassifier(n_neighbors=5)
     cv = CrossValidation(classifier=knn, k_folds=5, X=X, y=y)
     cv.fit()
 
+    print("*******************************************")
     print("****** Running a Logistic Regression ******")
+    print("*******************************************")
     lr = LogisticRegression(tol=0.001)
     cv = CrossValidation(classifier=lr, k_folds=5, X=X, y=y)
     cv.fit()
