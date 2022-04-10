@@ -160,6 +160,20 @@ class CrossValidation:
         f1_measure = self._get_avg(self.f1_measure)
 
         print("****** FINAL REPORT ******")
+        print("*** AVG ***")
+        print(f"Accuracy: {accuracy}")
+        print(f"Precision: {precision}")
+        print(f"Recall: {recall}")
+        print(f"Specificity: {specificity}")
+        print(f"F1_measure: {f1_measure}")
+
+        accuracy = self._get_std(self.accuracy)
+        precision = self._get_std(self.precision)
+        recall = self._get_std(self.recall)
+        specificity = self._get_std(self.specificity)
+        f1_measure = self._get_std(self.f1_measure)
+
+        print("*** STD ***")
         print(f"Accuracy: {accuracy}")
         print(f"Precision: {precision}")
         print(f"Recall: {recall}")
@@ -175,6 +189,9 @@ class CrossValidation:
 
     def _get_avg(self, array: List) -> float:
         return sum(array) / len(array)
+
+    def _get_std(self, array: List) -> np.ndarray:
+        return np.std(array)
 
 
 if __name__ == "__main__":
