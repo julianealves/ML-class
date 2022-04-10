@@ -20,10 +20,11 @@ class ConfusionMatrix:
 
     # Calculate the confusion matrix using a N x N array as input,
     # based on the array used to initialize the class.
-    # The final result will be a 2x2 array, as the results are binary
+    # The final result will be a M x M array, based on the quantity
+    # of different values. (E.g.: in a binary class, it will be a 2x2 array)
     def _calculate_confusion_matrix(self):
-        self._num = len(np.unique(self._true)) 
-        result = np.zeros((self._num, self._num))
+        k = len(np.unique(self._true)) 
+        result = np.zeros((k, k))
 
         for i in range(len(self._true)):
             result[self._true[i]][self._pred[i]] += 1
@@ -35,6 +36,7 @@ class ConfusionMatrix:
         self._fp = result[0,1] # False Positive
         self._fn = result[1,0] # False Negative
         self._matrix = result # The confusion matrix
+        self._num = len(self._true) # Quantity of elements
 
     # Return the confusion matrix, if necessary
     def get_confusion_matrix(self):
