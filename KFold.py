@@ -6,7 +6,12 @@
 import pandas as pd
 import numpy as np
 import random
+from typing import List, Tuple
 from sklearn.base import BaseEstimator
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import MinMaxScaler
 
 
 class CrossValidation:
@@ -43,7 +48,7 @@ class CrossValidation:
         for k in range(self.k_folds):
             X_fold = []
             y_fold = []
-            print(f"****** Generating fold {k+1}")
+            print(f"Generating fold {k+1}")
             if k != self.k_folds-1:
                 for key in class_proportion.keys():
                     # Calculates how many elements it needs to have in each fold for each class, to keep the proportion
@@ -100,10 +105,33 @@ class CrossValidation:
                     print(f"Using the fold {j} for train")
                     for values in X_folds[j]:
                         X_train.append(values)
-                    for y in y_folds:
+                    for y in y_folds[j]:
                         y_train.append(y)
+
+            # Gets the shape of the training set
+            shape = self._get_train_fold_shape(k, X_folds)
+
+            # Reshape the train and test sets (n_samples, n_features)
+            X_train = np.array(X_train).reshape((shape, self.X.shape[1]))
+            y_train = np.array(y_train).reshape((shape,))
+
+            X_test = np.array(X_test).reshape((self.X.shape[0] - shape, self.X.shape[1]))
+            y_test = np.array(y_test).reshape((self.X.shape[0] - shape,))
+
+            self.classifier.fit(X_train, y_train)
+            y_pred = self.classifier.predict(X_test)
+            print(f"Prediction: {y_pred}")
+
             print("*******************************")
-            # TODO: Insert here the classifier.fit and calculates the precision, accuracy, recall and stores somewhere
+
+            # TODO: calculate the precision, accuracy, recall and stores somewhere
+
+    def _get_train_fold_shape(self, k: int, X_folds: List) -> int:
+        rows = 0
+        for fold in range(self.k_folds):
+            if fold != k:
+                rows = rows + len(X_folds[fold])
+        return rows
 
 
 if __name__ == "__main__":
@@ -112,5 +140,28 @@ if __name__ == "__main__":
     X = spotify_df.loc[:, features].values
     y = spotify_df.loc[:, ["target"]].values
 
-    cv = CrossValidation(k_folds=5, X=X, y=y)
+    print("****** Running a Random Forest ******")
+    dtree = DecisionTreeClassifier(max_depth=10,
+                                   max_features="log2",
+                                   min_samples_leaf=10,
+                                   min_samples_split=5,
+                                   splitter="best",
+                                   criterion="entropy")
+
+    cv = CrossValidation(classifier=dtree, k_folds=5, X=X, y=y)
+    cv.fit()
+
+    # It is necessary to normalize the values for K-NN and Logistic Regression
+    scaler = MinMaxScaler()
+    scaler.fit(X)
+    X = scaler.transform(X)
+
+    print("****** Running a KNN ******")
+    knn = KNeighborsClassifier(n_neighbors=5)
+    cv = CrossValidation(classifier=knn, k_folds=5, X=X, y=y)
+    cv.fit()
+
+    print("****** Running a Logistic Regression ******")
+    lr = LogisticRegression(tol=0.001)
+    cv = CrossValidation(classifier=lr, k_folds=5, X=X, y=y)
     cv.fit()
